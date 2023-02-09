@@ -1,0 +1,99 @@
+def base_noIC(image):
+    x = 25
+    y = 350
+    w = 400
+    h = 110
+    cv2.rectangle(image, (x,y),(x+w, y+h), (36,255,12),2)
+    return image
+
+
+
+cv2.imwrite("temp/index_bbox_new.png",base_noIC(image))
+
+import pytesseract
+import cv2
+
+image = cv2.imread("data/siti.jpeg")
+
+
+gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+cv2.imwrite("temp/gray.jpg", gray)
+
+blur = cv2.GaussianBlur(gray, (7,7),0)
+cv2.imwrite("temp/blur.jpg", blur)
+
+thresh, im_bw = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+cv2.imwrite("temp/thresh.jpg", thresh)
+cv2.imwrite("temp/bw.jpg", im_bw)
+
+kernal = cv2.getStructuringElement(cv2.MORPH_RECT, (3,13))
+cv2.imwrite("temp/kernal.png",kernal)
+
+dilate = cv2.dilate(thresh, kernal, iterations=1)
+cv2.imwrite("temp/dilate.png",dilate)
+
+cnts = cv2.findContours(dilate, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+cnts = cnts[0] if len(cnts) == 2 else cents[1]
+cnts = sorted(cnts, key= lambda x: cv2.boundingRect(x)[0])
+results = []
+for c in cnts:
+    x, y, w, h = cv2.boundingRect(c)
+    if w == 250 and h >= 50:
+        cv2.rectangle(image, (x,y),(x+w, y+h), (36,255,12),2)
+#cv2.imwrite("temp/index_bbox_new.png",image)
+
+
+cnts = cv2.findContours(dilate, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+cnts = cnts[0] if len(cnts) == 2 else cents[1]
+cnts = sorted(cnts, key= lambda x: cv2.boundingRect(x)[0])
+results = []
+for c in cnts:
+    x, y, w, h = cv2.boundingRect(c)
+    if w == 250 and h >= 50:
+        cv2.rectangle(image, (x,y),(x+w, y+h), (36,255,12),2)
+#cv2.imwrite("temp/index_bbox_new.png",image)
+
+image2 = cropped_image
+level = 'block'
+for l,x,y,w,h,c,txt in df[['level','left','top','width','height','conf','text']].values:
+    #print(l,x,y,w,h,c)
+    if level == 'page':
+        if l == 1:
+            cv2.rectangle(image2,(x,y),(x+w,y+h),(0,0,0),2)
+        else:
+            continue
+            
+    elif level == 'block':
+        if l == 2:
+            cv2.rectangle(image2,(x,y),(x+w,y+h),(255,0,0),2)
+        else:
+            continue
+    
+    elif level == 'para':
+        if l == 3:
+            cv2.rectangle(image2,(x,y),(x+w,y+h),(0,255,0),2)
+        else:
+            continue
+    
+    elif level == 'line':
+        if l == 4:
+            cv2.rectangle(image2,(x,y),(x+w,y+h),(0,0,255),2)
+        else:
+            continue
+            
+    elif level == 'word':
+        if l == 5:
+            cv2.rectangle(image2,(x,y),(x+w,y+h),(0,255,0),2)
+            cv2.putText(image2,txt,(x,y),cv2.FONT_HERSHEY_PLAIN,1,(255,0,0),2)
+        else:
+            continue
+            
+cv2.imshow("bounding box",image2)
+cv2.waitKey()
+cv2.destroyAllWindows()
+
+
+
+
+
+
